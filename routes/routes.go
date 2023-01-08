@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,6 +11,7 @@ import (
 	"github.com/riwandylbs/go-learning-gin-gonic/middleware"
 	"github.com/riwandylbs/go-learning-gin-gonic/repository"
 	"github.com/riwandylbs/go-learning-gin-gonic/service"
+	"github.com/riwandylbs/go-learning-gin-gonic/utils"
 )
 
 var (
@@ -33,8 +35,9 @@ func SetupRoutes() {
 	}))
 
 	r.GET("/validate/me", middleware.AuthorizeHeader(), func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Welcome to gin with group routes",
+		c.JSON(http.StatusOK, &utils.ApiResponse{
+			Code:    http.StatusOK,
+			Message: "Your token still valid",
 		})
 	})
 
