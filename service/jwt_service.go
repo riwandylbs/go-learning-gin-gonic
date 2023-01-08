@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -62,6 +63,12 @@ func (jwtSrv *jwtService) GenerateToken(username string) string {
 }
 
 // ValidateToken implements JWTService
-func (jwt *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
-	panic("unimplemented")
+func (jwtSrv *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// sigining validation
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected siginign method")
+		}
+		return []byte(jwtSrv.secretkey), nil
+	})
 }

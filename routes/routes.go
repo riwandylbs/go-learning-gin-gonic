@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/riwandylbs/go-learning-gin-gonic/config"
 	"github.com/riwandylbs/go-learning-gin-gonic/controllers"
@@ -18,15 +21,26 @@ var (
 )
 
 func SetupRoutes() {
-	r := gin.Default()
+	r := gin.New()
 
-	r.GET("/", func(c *gin.Context) {
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	apiGroup := r.Group("/api", middleware.AuthorizeJWT())
+
+	apiGroup.GET("/isMe", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Welcome to gin server",
+			"message": "Welcome to gin with group routes",
 		})
 	})
 
-	r.GET("/all-users", middleware.AuthorizeJWT(), userController.GetAllUser)
+	// r.GET("/all-users", middleware.AuthorizeJWT(), userController.GetAllUser)
 
 	r.Run(":8080")
 }
