@@ -14,11 +14,13 @@ type UserController interface {
 
 type userController struct {
 	userService service.UserService
+	jwtService  service.JWTService
 }
 
-func NewUserController(s service.UserService) *userController {
+func NewUserController(s service.UserService, jwt service.JWTService) *userController {
 	return &userController{
 		userService: s,
+		jwtService:  jwt,
 	}
 }
 
