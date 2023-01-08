@@ -32,15 +32,15 @@ func SetupRoutes() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	apiGroup := r.Group("/api", middleware.AuthorizeJWT())
-
-	apiGroup.GET("/isMe", func(c *gin.Context) {
+	r.GET("/validate/me", middleware.AuthorizeHeader(), func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Welcome to gin with group routes",
 		})
 	})
 
-	// r.GET("/all-users", middleware.AuthorizeJWT(), userController.GetAllUser)
+	// grouping api with middleware authentication
+	apiGroup := r.Group("/api", middleware.AuthorizeJWT())
+	apiGroup.GET("/all-users", userController.GetAllUser)
 
 	r.Run(":8080")
 }

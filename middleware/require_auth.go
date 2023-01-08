@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -39,4 +40,19 @@ func AuthorizeJWT() gin.HandlerFunc {
 			c.Next()
 		}
 	}
+}
+
+func AuthorizeHeader() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		headerKey := c.GetHeader("API-KEY")
+		if headerKey != os.Getenv("API-KEY") {
+			c.AbortWithStatusJSON(http.StatusBadRequest, utils.ApiResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Unknown client request",
+			})
+			return
+		}
+		c.Next()
+	}
+
 }
