@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -11,6 +12,32 @@ import (
 	"github.com/riwandylbs/go-learning-gin-gonic/utils"
 )
 
+type TokenID struct {
+	Token string
+}
+
+func validateToken(c *gin.Context, tokenString string) {
+	token, err := service.NewJWTService().ValidateToken(tokenString)
+	if err != nil || token == nil {
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, utils.ApiResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Unauthorized",
+		})
+		return
+	}
+
+	// validate the token
+	if token.Valid {
+		claims := token.Claims.(jwt.MapClaims)
+		expired := claims["exp"]
+		fmt.Println("Expired token at : ", expired)
+
+		// Next
+		c.Next()
+	}
+}
+
 func AuthorizeJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get tokenString
@@ -18,27 +45,7 @@ func AuthorizeJWT() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		tokenString := authHeader[len(BEARER_SCHEMA):] // get string without bearer string
 
-		token, err := service.NewJWTService().ValidateToken(tokenString)
-
-		if err != nil || token == nil {
-
-			c.AbortWithStatusJSON(http.StatusBadRequest, utils.ApiResponse{
-				Code:    http.StatusBadRequest,
-				Message: "Unauthorized",
-			})
-			return
-		}
-
-		// validate the token
-		if token.Valid {
-			claims := token.Claims.(jwt.MapClaims)
-			expired := claims["exp"]
-
-			fmt.Println("Expired token at : ", expired)
-
-			// Next
-			c.Next()
-		}
+		validateToken(c, tokenString)
 	}
 }
 
@@ -52,7 +59,13 @@ func AuthorizeHeader() gin.HandlerFunc {
 			})
 			return
 		}
-		c.Next()
+
+		// Validate a token post from client
+		var tokenString TokenID
+		if err := c.ShouldBindJSON(&tokenString); err != nil {
+			log.Fatalf("Error binding to json")
+		}
+		validateToken(c, tokenString.Token)
 	}
 
 }

@@ -9,6 +9,7 @@ import (
 
 type UserRepository interface {
 	GetAll() ([]models.User, error)
+	Save(models.User) (models.User, error)
 }
 
 type userRepository struct {
@@ -28,4 +29,8 @@ func (u *userRepository) GetAll() (users []models.User, err error) {
 		log.Fatalf("error when get data from database")
 	}
 	return users, err
+}
+
+func (u *userRepository) Save(user models.User) (models.User, error) {
+	return user, nil
 }

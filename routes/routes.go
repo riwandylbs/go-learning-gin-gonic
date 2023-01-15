@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -11,15 +10,16 @@ import (
 	"github.com/riwandylbs/go-learning-gin-gonic/middleware"
 	"github.com/riwandylbs/go-learning-gin-gonic/repository"
 	"github.com/riwandylbs/go-learning-gin-gonic/service"
-	"github.com/riwandylbs/go-learning-gin-gonic/utils"
 )
 
 var (
-	db                                        = config.DatabaseConnections()
-	userRepository repository.UserRepository  = repository.NewUserRepository(db)
-	userService    service.UserService        = service.NewUserService(userRepository)
-	jwtService     service.JWTService         = service.NewJWTService()
-	userController controllers.UserController = controllers.NewUserController(userService, jwtService)
+	db                                          = config.DatabaseConnections()
+	userRepository  repository.UserRepository   = repository.NewUserRepository(db)
+	userService     service.UserService         = service.NewUserService(userRepository)
+	loginService    service.LoginService        = service.NewLoginService(userRepository)
+	jwtService      service.JWTService          = service.NewJWTService()
+	userController  controllers.UserController  = controllers.NewUserController(userService, jwtService)
+	loginController controllers.LoginController = controllers.NewLoginController(loginService, jwtService)
 )
 
 func SetupRoutes() {
@@ -34,12 +34,8 @@ func SetupRoutes() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	r.GET("/validate/me", middleware.AuthorizeHeader(), func(c *gin.Context) {
-		c.JSON(http.StatusOK, &utils.ApiResponse{
-			Code:    http.StatusOK,
-			Message: "Your token still valid",
-		})
-	})
+	// Validating existing token
+	r.POST("/validate/me", middleware.AuthorizeHeader())
 
 	// grouping api with middleware authentication
 	apiGroup := r.Group("/api", middleware.AuthorizeJWT())
