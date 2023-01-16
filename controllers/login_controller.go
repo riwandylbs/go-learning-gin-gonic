@@ -40,5 +40,11 @@ func (l *loginController) Login(c *gin.Context) {
 		})
 		return
 	}
-
+	token := l.jwtService.GenerateToken(username)
+	var res = map[string]string{"token": token}
+	c.JSON(http.StatusAccepted, utils.ApiResponse{
+		Code:    http.StatusAccepted,
+		Message: "Login Success",
+		Data:    res,
+	})
 }

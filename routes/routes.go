@@ -36,6 +36,7 @@ func SetupRoutes() {
 
 	// Validating existing token
 	r.POST("/validate/me", middleware.AuthorizeHeader())
+	r.POST("/login", loginController.Login)
 
 	// grouping api with middleware authentication
 	apiGroup := r.Group("/api", middleware.AuthorizeJWT())
