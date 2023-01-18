@@ -1,9 +1,14 @@
 package service
 
-import "github.com/riwandylbs/go-learning-gin-gonic/repository"
+import (
+	"log"
+
+	"github.com/riwandylbs/go-learning-gin-gonic/models"
+	"github.com/riwandylbs/go-learning-gin-gonic/repository"
+)
 
 type LoginService interface {
-	Login(username string, pwd string) bool
+	Login(username string, pwd string) ([]models.User, error)
 }
 
 type loginService struct {
@@ -16,6 +21,10 @@ func NewLoginService(r repository.UserRepository) *loginService {
 	}
 }
 
-func (l *loginService) Login(username string, pwd string) bool {
-	return true
+func (l *loginService) Login(username string, pwd string) ([]models.User, error) {
+	users, err := l.userRepository.Login(username, pwd)
+	if err != nil {
+		log.Fatal("terjadi kesalahan ", err)
+	}
+	return users, err
 }
